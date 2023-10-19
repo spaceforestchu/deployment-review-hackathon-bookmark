@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(morgan("dev"));
 
 app.use("/bookmarks", bookmarkController);
-app.use("/reviews", reviewsController);
+// app.use("/reviews", reviewsController);
 
 app.get("/", (req, res) => {
   res.send("Welcome to Bookmarks App");
@@ -23,9 +23,9 @@ app.get("/", (req, res) => {
 app.get("*", (req, res) => {
   res.status(404).send("Page not found!");
 });
-console.log(process.env.NODE_ENV);
+
 if (process.env.NODE_ENV === "production") {
-  cron.schedule("1 * * * * *", () => {
+  cron.schedule("5 * * * * *", () => {
     console.log("----");
 
     https
