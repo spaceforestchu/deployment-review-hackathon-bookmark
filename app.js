@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
+const cron = require("node-cron");
+const https = require("https");
 
 const bookmarkController = require("./controllers/bookmarkController");
 const reviewsController = require("./controllers/reviewsController");
@@ -12,24 +14,7 @@ app.use(express.json());
 app.use(morgan("dev"));
 
 app.use("/bookmarks", bookmarkController);
-// app.use("/reviews", reviewsController);
-
-// GET - /bookmarks - get all bookmarks
-// POST - /bookmarks - create bookmark
-// GET - /bookmarks  - get bookmark by id
-// PUT - /bookmarks - update bookmark by id
-// DELETE - /bookmarks - delete bookmark by id
-
-// GET - /reviews - get all reviews
-// POST - /review - create review
-// GET - /reviews  - get review by id
-// PUT - /reviews - update review by id
-// DELETE - /reviews - delete review by id
-
-/*
-  /bookmarks/:id/reviews
-  
-*/
+app.use("/reviews", reviewsController);
 
 app.get("/", (req, res) => {
   res.send("Welcome to Bookmarks App");
@@ -38,5 +23,33 @@ app.get("/", (req, res) => {
 app.get("*", (req, res) => {
   res.status(404).send("Page not found!");
 });
+console.log(process.env.NODE_ENV);
+if (process.env.NODE_ENV === "production") {
+  cron.schedule("1 * * * * *", () => {
+    console.log("----");
+
+    https
+      .get(
+        "https://deployment-review-hackathon-bookmark.onrender.com/bookmarks",
+        (resp) => {
+          let data = "";
+
+          // A chunk of data has been received.
+          resp.on("data", (chunk) => {
+            data += chunk;
+          });
+
+          // The whole response has been received. Print out the result.
+          resp.on("end", () => {
+            console.log(JSON.parse(data));
+            // console.log(JSON.parse(data).explanation);
+          });
+        }
+      )
+      .on("error", (err) => {
+        console.log("Error: " + err.message);
+      });
+  });
+}
 
 module.exports = app;
