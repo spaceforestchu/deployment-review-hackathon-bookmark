@@ -25,7 +25,7 @@ app.get("*", (req, res) => {
 });
 
 if (process.env.NODE_ENV === "production") {
-  cron.schedule("5 * * * * *", () => {
+  cron.schedule("* 15 * * * *", () => {
     console.log("----");
 
     https
